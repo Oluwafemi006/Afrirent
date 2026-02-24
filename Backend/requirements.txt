@@ -1,0 +1,51 @@
+# AfriRent Backend Requirements
+# Python 3.11+
+
+# Django Core
+Django
+python-decouple==3.8
+
+# Database
+psycopg2-binary==2.9.9
+
+# Django REST Framework
+djangorestframework==3.14.0
+djangorestframework-simplejwt==5.3.1
+
+# CORS Headers
+django-cors-headers==4.3.1
+
+# Image Processing & Cloud Storage
+Pillow==10.2.0
+cloudinary==1.39.0
+django-cloudinary-storage==0.3.0
+
+# Utilities
+python-dateutil==2.8.2
+pytz==2024.1
+
+# Development
+django-extensions==3.2.3
+ipython==8.20.0
+
+# Testing
+pytest==7.4.4
+pytest-django==4.7.0
+pytest-cov==4.1.0
+factory-boy==3.3.0
+
+# Code Quality
+black==23.12.1
+flake8==7.0.0
+isort==5.13.2
+
+# Production
+gunicorn==21.2.0
+whitenoise==6.6.0
+
+#Interface django
+drf-spectacular
+drf-spectacular-sidecar>=0.28.0
+
+# Filtering
+django-filter==23.5

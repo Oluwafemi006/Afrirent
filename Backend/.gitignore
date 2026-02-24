@@ -1,0 +1,23 @@
+# Virtual environments
+env_afri/
+venv/
+.venv/
+env/
+
+# Django stuff
+__pycache__/
+*.py[cod]
+*.sqlite3
+media/
+staticfiles/
+.coverage
+htmlcov/
+*.log
+
+# Env files
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
