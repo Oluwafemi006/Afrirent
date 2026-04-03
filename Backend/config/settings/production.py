@@ -17,16 +17,34 @@ DATABASES = {
     }
 }
 
-# Sécurité
-SECURE_SSL_REDIRECT = True
+# Sécurité — Render termine SSL au load balancer, forward en HTTP
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = False  # Render gère déjà la redirection HTTPS
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
 
 # CORS
 CORS_ALLOWED_ORIGINS = [
     "https://afrirent.netlify.app",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
 ]
+CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+CSRF_TRUSTED_ORIGINS = [
+    "https://afrirent.netlify.app",
+    "https://afrirent-production.up.railway.app",
+]
 
 # Cloudinary
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'

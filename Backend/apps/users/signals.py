@@ -25,16 +25,6 @@ def create_user_profile(sender, instance, created, **kwargs):
         logger.info(f"✅ Profile créé automatiquement pour l'utilisateur: {instance.username}")
 
 
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    """
-    Signal: Sauvegarder le Profile lorsque le User est sauvegardé
-    
-    Garantit que le profil est toujours synchronisé avec le user
-    """
-    if hasattr(instance, 'profile'):
-        instance.profile.save()
-
 
 @receiver(post_save, sender=Profile)
 def check_identity_verification(sender, instance, **kwargs):

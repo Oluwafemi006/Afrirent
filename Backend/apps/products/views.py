@@ -125,11 +125,6 @@ class ProductViewSet(viewsets.ModelViewSet):
         serializer.save(seller=self.request.user)
     
     def perform_update(self, serializer):
-        """
-        Vérifier que l'utilisateur modifie bien son propre produit
-        """
-        if serializer.instance.seller != self.request.user:
-            self.permission_denied(self.request)
         serializer.save()
     
     @action(detail=False, methods=['get'], url_path='my-products', permission_classes=[IsAuthenticated])
