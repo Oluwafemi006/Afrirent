@@ -17,9 +17,8 @@ DATABASES = {
     }
 }
 
-# Sécurité — Render termine SSL au load balancer, forward en HTTP
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = False  # Render gère déjà la redirection HTTPS
+# Sécurité HTTPS pour Railway (gère nativement)
+SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_BROWSER_XSS_FILTER = True
