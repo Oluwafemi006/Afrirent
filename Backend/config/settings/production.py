@@ -2,7 +2,7 @@ from .base import *
 
 DEBUG = False
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='afrirent.onrender.com').split(',')
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='afrirent-production.up.railway.app,.up.railway.app,localhost').split(',')
 
 DATABASES = {
     'default': {
