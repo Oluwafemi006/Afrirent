@@ -9,15 +9,15 @@ import api from '../../../services/api';
  * Produits - GET
  */
 export const getProducts = (params = {}) => {
-  return api.get('/products/', { params });
+  return api.get('products/', { params });
 };
 
 export const getProductDetail = (id) => {
-  return api.get(`/products/${id}/`);
+  return api.get(`products/${id}/`);
 };
 
 export const getMyProducts = (params = {}) => {
-  return api.get('/products/my-products/', { params });
+  return api.get('products/my-products/', { params });
 };
 
 /**
@@ -30,39 +30,39 @@ export const createProduct = (data) => {
       'Content-Type': 'multipart/form-data',
     };
   }
-  return api.post('/products/', data, config);
+  return api.post('products/', data, config);
 };
 
 /**
  * Produits - UPDATE
  */
 export const updateProduct = (id, data) => {
-  return api.patch(`/products/${id}/`, data);
+  return api.patch(`products/${id}/`, data);
 };
 
 export const updateProductFull = (id, data) => {
-  return api.put(`/products/${id}/`, data);
+  return api.put(`products/${id}/`, data);
 };
 
 /**
  * Produits - DELETE
  */
 export const deleteProduct = (id) => {
-  return api.delete(`/products/${id}/`);
+  return api.delete(`products/${id}/`);
 };
 
 /**
  * Statut - Change product status
  */
 export const changeProductStatus = (id, status) => {
-  return api.patch(`/products/${id}/status/`, { status });
+  return api.patch(`products/${id}/status/`, { status });
 };
 
 /**
  * Vues - Increment views
  */
 export const incrementProductViews = (id) => {
-  return api.post(`/products/${id}/increment_views/`);
+  return api.post(`products/${id}/increment_views/`);
 };
 
 /**
@@ -74,7 +74,7 @@ export const uploadProductImages = (id, files) => {
     formData.append('images', file);
   });
 
-  return api.post(`/products/${id}/upload_images/`, formData, {
+  return api.post(`products/${id}/upload_images/`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
@@ -85,15 +85,15 @@ export const uploadProductImages = (id, files) => {
  * Catégories
  */
 export const getCategories = () => {
-  return api.get('/products/categories/');
+  return api.get('products/categories/');
 };
 
 export const getCategoryDetail = (slug) => {
-  return api.get(`/products/categories/${slug}/`);
+  return api.get(`products/categories/${slug}/`);
 };
 
 export const createCategory = (name) => {
-  return api.post('/products/categories/', { name });
+  return api.post('products/categories/', { name });
 };
 
 export default {

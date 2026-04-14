@@ -15,8 +15,8 @@ const getBaseURL = () => {
     return envURL;
   }
   
-  // Sinon on ajoute /api à la fin (en gérant le slash final éventuel de l'URL de base)
-  return envURL.endsWith("/") ? `${envURL}api` : `${envURL}/api`;
+  // Sinon on ajoute /api/ à la fin (en gérant le slash final éventuel de l'URL de base)
+  return envURL.endsWith("/") ? `${envURL}api/` : `${envURL}/api/`;
 };
 
 const api = axios.create({
@@ -97,7 +97,7 @@ api.interceptors.response.use(
  * @returns {Promise} Réponse avec user + tokens
  */
 export const register = (userData) => {
-  return api.post("/auth/register/", userData);
+  return api.post("auth/register/", userData);
 };
 
 /**
@@ -107,7 +107,7 @@ export const register = (userData) => {
  * @returns {Promise} Réponse avec user + tokens
  */
 export const login = (username, password) => {
-  return api.post("/auth/login/", { username, password });
+  return api.post("auth/login/", { username, password });
 };
 
 /**
@@ -116,7 +116,7 @@ export const login = (username, password) => {
  * @returns {Promise}
  */
 export const logout = (refreshToken) => {
-  return api.post("/auth/logout/", { refresh: refreshToken });
+  return api.post("auth/logout/", { refresh: refreshToken });
 };
 
 /**
@@ -124,7 +124,7 @@ export const logout = (refreshToken) => {
  * @returns {Promise} User complet avec profil
  */
 export const getCurrentUser = () => {
-  return api.get("/auth/me/");
+  return api.get("auth/me/");
 };
 
 // === ENDPOINTS USERS ===
@@ -135,7 +135,7 @@ export const getCurrentUser = () => {
  * @returns {Promise} Liste paginée d'utilisateurs
  */
 export const getUsers = (params = {}) => {
-  return api.get("/auth/users/", { params });
+  return api.get("auth/users/", { params });
 };
 
 /**
@@ -144,7 +144,7 @@ export const getUsers = (params = {}) => {
  * @returns {Promise} User complet
  */
 export const getUser = (userId) => {
-  return api.get(`/auth/users/${userId}/`);
+  return api.get(`auth/users/${userId}/`);
 };
 
 /**
@@ -162,11 +162,11 @@ export const updateUser = (userId, userData) => {
         formData.append(key, userData[key]);
       }
     });
-    return api.put(`/auth/users/${userId}/`, formData, {
+    return api.put(`auth/users/${userId}/`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
   }
-  return api.put(`/auth/users/${userId}/`, userData);
+  return api.put(`auth/users/${userId}/`, userData);
 };
 
 /**
@@ -175,7 +175,7 @@ export const updateUser = (userId, userData) => {
  * @returns {Promise}
  */
 export const deleteUser = (userId) => {
-  return api.delete(`/auth/users/${userId}/`);
+  return api.delete(`auth/users/${userId}/`);
 };
 
 /**
@@ -186,7 +186,7 @@ export const deleteUser = (userId) => {
 export const verifyIdentity = (document) => {
   const formData = new FormData();
   formData.append("identity_document", document);
-  return api.post("/auth/users/verify/", formData, {
+  return api.post("auth/users/verify/", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
 };
@@ -197,7 +197,7 @@ export const verifyIdentity = (document) => {
  * @returns {Promise} Stats (products_count, reviews_count, etc.)
  */
 export const getUserStats = (userId) => {
-  return api.get(`/auth/users/${userId}/stats/`);
+  return api.get(`auth/users/${userId}/stats/`);
 };
 
 // Export de l'instance axios configurée pour usage avancé
