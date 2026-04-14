@@ -4,29 +4,17 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Plus, Edit2, Trash2, Eye, EyeOff, AlertCircle, Loader } from 'lucide-react';
 import { getMyProducts, deleteProduct, changeProductStatus } from '../api/products';
-import useAuthStore from '../../../stores/authStore';
 import { toast } from 'react-toastify';
 
 const MyProducts = () => {
-  const navigate = useNavigate();
-  const { isAuthenticated } = useAuthStore();
-
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState('all');
   const [deleting, setDeleting] = useState(null);
-
-  // Rediriger si non authentifié
-  useEffect(() => {
-    if (!isAuthenticated) {
-      toast.error('Vous devez être connecté');
-      navigate('/login');
-    }
-  }, [isAuthenticated, navigate]);
 
   // Charger les produits
   useEffect(() => {
@@ -44,10 +32,8 @@ const MyProducts = () => {
       }
     };
 
-    if (isAuthenticated) {
-      fetchProducts();
-    }
-  }, [isAuthenticated]);
+    fetchProducts();
+  }, []);
 
   const handleDelete = async (id) => {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette annonce?')) return;

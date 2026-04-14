@@ -314,11 +314,12 @@ class CartViewSet(viewsets.GenericViewSet):
         
         cart = self._get_cart(request.user)
         _, created = CartItem.objects.get_or_create(cart=cart, product=product)
-        if not created:
-            return Response({'error': 'Produit déjà dans le panier'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Si le produit était déjà là, on renvoie quand même le panier avec un code 200
+        status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
         
         serializer = self.get_serializer(cart)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status_code)
 
     @action(detail=False, methods=['delete'], url_path='remove/(?P<product_id>[^/.]+)')
     def remove(self, request, product_id=None):

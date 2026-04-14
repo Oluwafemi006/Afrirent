@@ -17,10 +17,23 @@ const useCartStore = create((set, get) => ({
   },
 
   addItem: async (productId) => {
+    // Vérifier si déjà présent (optionnel, mais plus rapide)
+    const currentCart = get().cart;
+    if (currentCart?.items?.some(item => item.product.id === productId)) {
+      toast.info('Ce produit est déjà dans votre panier');
+      return;
+    }
+
     try {
       const response = await addToCart(productId);
       set({ cart: response.data });
-      toast.success('Produit ajouté au panier');
+      
+      // On peut différencier le message selon le status de la réponse
+      if (response.status === 201) {
+        toast.success('Produit ajouté au panier');
+      } else {
+        toast.info('Produit déjà dans le panier');
+      }
     } catch (error) {
       const msg = error.response?.data?.error || 'Erreur lors de l\'ajout au panier';
       toast.error(msg);

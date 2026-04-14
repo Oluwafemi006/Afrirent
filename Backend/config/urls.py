@@ -1,4 +1,3 @@
-
 # AfriRent URL Configuration
 
 from django.contrib import admin
@@ -6,9 +5,15 @@ from django.urls import path, include
 from django.views.generic import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
+from decouple import config
 
 # drf-spectacular → Swagger moderne et sans bug
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
+
+# Admin URL configurable pour plus de sécurité (Security through obscurity)
+ADMIN_URL = config('ADMIN_URL', default='admin/')
+if not ADMIN_URL.endswith('/'):
+    ADMIN_URL += '/'
 
 urlpatterns = [
     # Racine → Swagger direct (plus jamais 404)
@@ -20,7 +25,7 @@ urlpatterns = [
     path('redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 
     # Admin & API
-    path('admin/', admin.site.urls),
+    path(ADMIN_URL, admin.site.urls),
     path('api/', include('apps.core.urls')),
     path('api/auth/', include('apps.users.urls')),
     path('api/products/', include('apps.products.urls')),

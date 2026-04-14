@@ -1,23 +1,15 @@
 import { useEffect } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { ShoppingCart, Trash2, ShoppingBag, X } from 'lucide-react';
 import { toast } from 'react-toastify';
 import useCartStore from '../../../stores/cartStore';
-import useAuthStore from '../../../stores/authStore';
 
 const Cart = () => {
-  const { isAuthenticated } = useAuthStore();
   const { cart, loading, fetchCart, removeItem, clearAll } = useCartStore();
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchCart();
-    }
-  }, [isAuthenticated, fetchCart]);
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
+    fetchCart();
+  }, [fetchCart]);
 
   if (loading) {
     return (

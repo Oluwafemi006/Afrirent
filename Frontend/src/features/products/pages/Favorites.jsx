@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Heart, MapPin, Eye, ShoppingCart, PackageOpen } from 'lucide-react';
-import useAuthStore from '../../../stores/authStore';
 import useFavoriteStore from '../../../stores/favoriteStore';
 import useCartStore from '../../../stores/cartStore';
 
@@ -13,19 +12,12 @@ const conditionLabels = {
 };
 
 const Favorites = () => {
-  const { isAuthenticated } = useAuthStore();
   const { favorites, loading, fetchFavorites, toggle } = useFavoriteStore();
   const { addItem } = useCartStore();
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchFavorites();
-    }
-  }, [isAuthenticated, fetchFavorites]);
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
+    fetchFavorites();
+  }, [fetchFavorites]);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">

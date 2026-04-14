@@ -6,8 +6,21 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 // Configuration de base d'Axios
+const getBaseURL = () => {
+  const envURL = import.meta.env.VITE_API_URL;
+  if (!envURL) return "http://localhost:8000/api";
+  
+  // Si l'URL se termine déjà par /api ou /api/, on la garde telle quelle
+  if (envURL.endsWith("/api") || envURL.endsWith("/api/")) {
+    return envURL;
+  }
+  
+  // Sinon on ajoute /api à la fin (en gérant le slash final éventuel de l'URL de base)
+  return envURL.endsWith("/") ? `${envURL}api` : `${envURL}/api`;
+};
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000/api",
+  baseURL: getBaseURL(),
   headers: {
     "Content-Type": "application/json",
   },
@@ -45,9 +58,7 @@ api.interceptors.response.use(
 
         // Tenter de rafraîchir le token
         const response = await axios.post(
-          `${
-            import.meta.env.VITE_API_URL || "http://localhost:8000/api"
-          }/auth/token/refresh/`,
+          `${getBaseURL()}/auth/token/refresh/`,
           { refresh: refreshToken }
         );
 

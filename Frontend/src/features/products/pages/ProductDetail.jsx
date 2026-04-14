@@ -41,6 +41,13 @@ const ProductDetail = () => {
 
   useEffect(() => {
     const fetchProduct = async () => {
+      // Sécurité si l'ID est indéfini ou est la chaîne "undefined"
+      if (!id || id === 'undefined') {
+        setError('ID de produit invalide');
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
         const response = await getProductDetail(id);
@@ -53,11 +60,11 @@ const ProductDetail = () => {
       }
     };
 
-    if (id) fetchProduct();
+    fetchProduct();
   }, [id]);
 
   useEffect(() => {
-    if (id) {
+    if (id && id !== 'undefined') {
       incrementProductViews(id).catch(() => {});
     }
   }, [id]);

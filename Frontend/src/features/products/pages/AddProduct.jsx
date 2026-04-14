@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, Plus, X, Loader } from 'lucide-react';
-import { createProduct, getCategories, createCategory } from '../api/products';
+import { createProduct, getCategories } from '../api/products';
 import { toast } from 'react-toastify';
 
 const AddProduct = () => {
@@ -15,7 +15,6 @@ const AddProduct = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
-  const [previewImages, setPreviewImages] = useState([]);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -26,8 +25,8 @@ const AddProduct = () => {
     location: '',
   });
 
-  const [categoryInput, setCategoryInput] = useState('');
-  const [selectedFiles, setSelectedFiles] = useState([]);
+  // Gestion unifiée des images (fichier + aperçu)
+  const [images, setImages] = useState([]);
 
   // Charger les catégories
   useEffect(() => {
@@ -35,7 +34,9 @@ const AddProduct = () => {
       setCategoriesLoading(true);
       try {
         const response = await getCategories();
-        setCategories(response.data.results || response.data);
+        // Gérer le cas où la réponse est paginée ou directe
+        const cats = response.data.results || response.data;
+        setCategories(Array.isArray(cats) ? cats : []);
       } catch (err) {
         console.error('Erreur chargement catégories:', err);
         toast.error('Erreur lors du chargement des catégories');
@@ -58,91 +59,90 @@ const AddProduct = () => {
   const handleImageSelect = (e) => {
     const files = Array.from(e.target.files || []);
     
-    // Limiter à 5 images
-    if (selectedFiles.length + files.length > 5) {
+    if (images.length + files.length > 5) {
       toast.warning('Maximum 5 images autorisées');
       return;
     }
 
-    setSelectedFiles(prev => [...prev, ...files]);
-
-    // Créer des aperçus
     files.forEach(file => {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPreviewImages(prev => [...prev, reader.result]);
+        setImages(prev => [...prev, { file, preview: reader.result }]);
       };
       reader.readAsDataURL(file);
     });
   };
 
   const removeImage = (index) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
-    setPreviewImages(prev => prev.filter((_, i) => i !== index));
+    setImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.title.trim()) {
-      toast.error('Veuillez entrer un titre');
-      return;
-    }
-    if (!formData.description.trim()) {
-      toast.error('Veuillez entrer une description');
-      return;
-    }
-    if (!formData.price) {
-      toast.error('Veuillez entrer un prix');
-      return;
-    }
-    if (selectedFiles.length === 0) {
-      toast.error('Veuillez ajouter au moins une image');
-      return;
-    }
+    // Validations de base
+    if (!formData.title.trim()) return toast.error('Veuillez entrer un titre');
+    if (!formData.description.trim()) return toast.error('Veuillez entrer une description');
+    if (!formData.price) return toast.error('Veuillez entrer un prix');
+    if (!formData.category) return toast.error('Veuillez sélectionner une catégorie');
+    if (images.length === 0) return toast.error('Veuillez ajouter au moins une image');
 
     try {
       setLoading(true);
 
-      let categoryId = formData.category;
-      if (!categoryId && categoryInput.trim()) {
-        try {
-          const catResponse = await createCategory(categoryInput.trim());
-          categoryId = catResponse.data.id;
-          setCategories(prev => [...prev, catResponse.data]);
-        } catch (catErr) {
-          toast.error('Erreur lors de la création de la catégorie');
-          setLoading(false);
-          return;
-        }
-      }
-      if (!categoryId) {
-        toast.error('Veuillez sélectionner ou créer une catégorie');
-        setLoading(false);
-        return;
-      }
-
       const formDataToSend = new FormData();
-      formDataToSend.append('title', formData.title);
-      formDataToSend.append('description', formData.description);
-      formDataToSend.append('price', parseFloat(formData.price));
-      formDataToSend.append('category', categoryId);
+      formDataToSend.append('title', formData.title.trim());
+      formDataToSend.append('description', formData.description.trim());
+      // Envoyer le prix comme un entier (le backend a decimal_places=0)
+      formDataToSend.append('price', Math.round(parseFloat(formData.price)));
+      formDataToSend.append('category', formData.category);
       formDataToSend.append('condition', formData.condition);
-      formDataToSend.append('location', formData.location);
+      formDataToSend.append('location', formData.location.trim());
 
-      selectedFiles.forEach((file) => {
-        formDataToSend.append('images', file);
+      images.forEach((imgObj) => {
+        formDataToSend.append('images', imgObj.file);
       });
 
       const response = await createProduct(formDataToSend);
-      toast.success('Annonce créée avec succès!');
-      navigate(`/products/${response.data.id}`);
+      
+      if (response.data && response.data.id) {
+        toast.success('Annonce créée avec succès!');
+        navigate(`/products/${response.data.id}`);
+      } else {
+        throw new Error('ID du produit manquant dans la réponse');
+      }
     } catch (err) {
-      console.error('Erreur:', err);
-      const errorMsg = err.response?.data?.detail ||
-                       Object.values(err.response?.data || {}).flat()[0] ||
-                       'Erreur lors de la création de l\'annonce';
-      toast.error(errorMsg);
+      console.error('Erreur creation annonce:', err);
+      const data = err.response?.data;
+      let errorMsg = 'Erreur lors de la création de l\'annonce';
+      
+      if (data) {
+        if (typeof data === 'string') {
+          errorMsg = data;
+        } else if (data.detail) {
+          errorMsg = data.detail;
+        } else {
+          // Extraire tous les messages d'erreur des champs
+          const errorMessages = [];
+          Object.entries(data).forEach(([field, errors]) => {
+            const fieldName = field === 'images' ? 'Images' : 
+                             field === 'price' ? 'Prix' : 
+                             field === 'category' ? 'Catégorie' : field;
+            
+            if (Array.isArray(errors)) {
+              errorMessages.push(`${fieldName}: ${errors.join(', ')}`);
+            } else if (typeof errors === 'string') {
+              errorMessages.push(`${fieldName}: ${errors}`);
+            }
+          });
+          
+          if (errorMessages.length > 0) {
+            errorMsg = errorMessages.join(' | ');
+          }
+        }
+      }
+      
+      toast.error(errorMsg, { autoClose: 5000 });
     } finally {
       setLoading(false);
     }
@@ -176,6 +176,7 @@ const AddProduct = () => {
                 placeholder="Ex: iPhone 13 Pro en bon état"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 maxLength={200}
+                required
               />
               <p className="text-xs text-gray-500 mt-1">{formData.title.length}/200</p>
             </div>
@@ -194,6 +195,7 @@ const AddProduct = () => {
                 rows={6}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 maxLength={2000}
+                required
               />
               <p className="text-xs text-gray-500 mt-1">{formData.description.length}/2000</p>
             </div>
@@ -213,8 +215,9 @@ const AddProduct = () => {
                     onChange={handleInputChange}
                     placeholder="0"
                     min="0"
-                    step="1000"
+                    step="1"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
                   />
                   <span className="absolute right-4 top-3 text-gray-500">FCFA</span>
                 </div>
@@ -226,33 +229,25 @@ const AddProduct = () => {
                   Catégorie *
                 </label>
                 {categoriesLoading ? (
-                  <div className="px-4 py-3 bg-gray-50 rounded-lg text-gray-500">Chargement...</div>
+                  <div className="px-4 py-3 bg-gray-50 rounded-lg text-gray-500 flex items-center gap-2">
+                    <Loader className="animate-spin" size={16} /> Chargement...
+                  </div>
                 ) : (
-                  <>
-                    <input
-                      type="text"
-                      id="category"
-                      list="category-list"
-                      value={categoryInput}
-                      onChange={(e) => {
-                        setCategoryInput(e.target.value);
-                        const match = categories.find(c => c.name.toLowerCase() === e.target.value.toLowerCase());
-                        setFormData(prev => ({ ...prev, category: match ? match.id : '' }));
-                      }}
-                      placeholder="Tapez ou sélectionnez une catégorie"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <datalist id="category-list">
-                      {categories.map(cat => (
-                        <option key={cat.id} value={cat.name} />
-                      ))}
-                    </datalist>
-                    {categoryInput && !formData.category && (
-                      <p className="text-xs text-blue-600 mt-1">
-                        Nouvelle catégorie &quot;{categoryInput}&quot; sera créée
-                      </p>
-                    )}
-                  </>
+                  <select
+                    id="category"
+                    name="category"
+                    value={formData.category}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  >
+                    <option value="">Sélectionner une catégorie</option>
+                    {categories.map(cat => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
                 )}
               </div>
             </div>
@@ -269,6 +264,7 @@ const AddProduct = () => {
                   value={formData.condition}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
                 >
                   {conditions.map(cond => (
                     <option key={cond.value} value={cond.value}>
@@ -298,11 +294,11 @@ const AddProduct = () => {
             {/* Images */}
             <div>
               <label className="block text-sm font-semibold text-gray-900 mb-4">
-                Photos de l'article * ({selectedFiles.length}/5)
+                Photos de l'article * ({images.length}/5)
               </label>
 
               {/* Upload Zone */}
-              {selectedFiles.length < 5 && (
+              {images.length < 5 && (
                 <label className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition block">
                   <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
                   <p className="text-gray-700 font-semibold mb-1">
@@ -322,28 +318,28 @@ const AddProduct = () => {
               )}
 
               {/* Previews */}
-              {previewImages.length > 0 && (
+              {images.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4">
-                  {previewImages.map((preview, index) => (
+                  {images.map((img, index) => (
                     <div
                       key={index}
                       className="relative group"
                     >
                       <img
-                        src={preview}
+                        src={img.preview}
                         alt={`Preview ${index + 1}`}
                         className="w-full h-24 object-cover rounded-lg"
                       />
                       <button
                         type="button"
                         onClick={() => removeImage(index)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition"
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition"
                       >
                         <X size={16} />
                       </button>
                       {index === 0 && (
-                        <span className="absolute bottom-1 left-1 bg-blue-500 text-white text-xs px-2 py-1 rounded">
-                          Principal
+                        <span className="absolute bottom-1 left-1 bg-blue-500 text-white text-[10px] px-1.5 py-0.5 rounded font-bold uppercase">
+                          Principale
                         </span>
                       )}
                     </div>

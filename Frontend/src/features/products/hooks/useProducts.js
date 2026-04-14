@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getProducts, getProductDetail } from '../api/products';
+import { getProducts } from '../api/products';
 
 export const useProducts = (params = {}) => {
   const [products, setProducts] = useState([]);
@@ -45,30 +45,4 @@ export const useProducts = (params = {}) => {
   }, [paramsKey]);
 
   return { products, loading, error, pagination };
-};
-
-export const useProductDetail = (productId) => {
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (!productId) return;
-
-    const fetchProduct = async () => {
-      try {
-        setLoading(true);
-        const response = await getProductDetail(productId);
-        setProduct(response.data);
-      } catch (err) {
-        setError(err.response?.data?.detail || 'Produit non trouvé');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProduct();
-  }, [productId]);
-
-  return { product, loading, error };
 };

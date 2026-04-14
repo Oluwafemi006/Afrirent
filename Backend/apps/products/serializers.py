@@ -149,6 +149,7 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = [
+            'id',
             'title',
             'description',
             'price',
@@ -157,6 +158,7 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
             'category',
             'images',
         ]
+        read_only_fields = ['id']
     
     def validate_price(self, value):
         """Valider que le prix est > 0"""
@@ -166,6 +168,8 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
     
     def validate_images(self, value):
         """Valider le nombre d'images (max 5)"""
+        if not value:
+            return []
         if len(value) > 5:
             raise serializers.ValidationError("Maximum 5 images autorisées par produit.")
         for img in value:
@@ -175,15 +179,21 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         """Créer le produit et ses images"""
-        images_data = validated_data.pop('images', [])
+        request = self.context.get('request')
         
-        # Ajouter le vendeur (utilisateur connecté)
-        validated_data['seller'] = self.context['request'].user
+        # Récupérer les images de validated_data (ListField s'en occupe)
+        # ou directement de request.FILES si validated_data est vide
+        images_data = validated_data.pop('images', [])
+        if not images_data and request and request.FILES:
+            images_data = request.FILES.getlist('images')
+            
+        # Ajouter le vendeur
+        validated_data['seller'] = request.user
         
         # Créer le produit
         product = Product.objects.create(**validated_data)
         
-        # Créer les images
+        # Créer les images associées
         for order, image in enumerate(images_data):
             ProductImage.objects.create(
                 product=product,
@@ -195,7 +205,16 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
     
     def update(self, instance, validated_data):
         """Mettre à jour le produit (images gérées séparément)"""
-        images_data = validated_data.pop('images', None)
+        request = self.context.get('request')
+        images_data = None
+        if request and request.FILES:
+            images_data = request.FILES.getlist('images')
+            
+        # Fallback sur validated_data si vide
+        if not images_data and 'images' in validated_data:
+            images_data = validated_data.pop('images')
+        elif 'images' in validated_data:
+            validated_data.pop('images')
         
         # Mettre à jour les champs du produit
         for attr, value in validated_data.items():
