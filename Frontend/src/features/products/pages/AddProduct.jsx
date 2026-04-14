@@ -1,12 +1,12 @@
 /**
  * AddProduct Page
- * Formulaire pour créer une nouvelle annonce
+ * Formulaire pour créer une nouvelle annonce avec combobox auto-création catégories
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, Plus, X, Loader } from 'lucide-react';
-import { createProduct, getCategories } from '../api/products';
+import { createProduct, getCategories, createCategoryIfNotExists } from '../api/products';
 import { toast } from 'react-toastify';
 
 const AddProduct = () => {
@@ -24,6 +24,12 @@ const AddProduct = () => {
     condition: 'good',
     location: '',
   });
+
+  // Category ID pour backend (string ou number)
+  const [categoryId, setCategoryId] = useState('');
+
+  // Status création catégorie
+  const [creatingCategory, setCreatingCategory] = useState(false);
 
   // Gestion unifiée des images (fichier + aperçu)
   const [images, setImages] = useState([]);
@@ -54,6 +60,41 @@ const AddProduct = () => {
       ...prev,
       [name]: value,
     }));
+    
+    // Reset category ID quand on tape
+    if (name === 'category') {
+      setCategoryId('');
+    }
+  };
+
+  // Handle category input - chercher ou créer
+  const handleCategoryChange = async (categoryName) => {
+    if (!categoryName || categoryName.trim().length < 2) {
+      setFormData(prev => ({ ...prev, category: '' }));
+      setCategoryId('');
+      return;
+    }
+
+    try {
+      setCreatingCategory(true);
+      const result = await createCategoryIfNotExists(categoryName);
+      
+      setFormData(prev => ({ ...prev, category: result.category.name }));
+      setCategoryId(result.category.id);
+      
+      if (result.created) {
+        toast.success(`Nouvelle catégorie "${result.category.name}" créée !`);
+        // Refresh liste catégories
+        const response = await getCategories();
+        const cats = response.data.results || response.data;
+        setCategories(Array.isArray(cats) ? cats : []);
+      }
+    } catch (err) {
+      toast.error('Erreur avec la catégorie');
+      console.error(err);
+    } finally {
+      setCreatingCategory(false);
+    }
   };
 
   const handleImageSelect = (e) => {
@@ -84,7 +125,7 @@ const AddProduct = () => {
     if (!formData.title.trim()) return toast.error('Veuillez entrer un titre');
     if (!formData.description.trim()) return toast.error('Veuillez entrer une description');
     if (!formData.price) return toast.error('Veuillez entrer un prix');
-    if (!formData.category) return toast.error('Veuillez sélectionner une catégorie');
+    if (!formData.category) return toast.error('Veuillez entrer une catégorie');
     if (images.length === 0) return toast.error('Veuillez ajouter au moins une image');
 
     try {
@@ -95,7 +136,10 @@ const AddProduct = () => {
       formDataToSend.append('description', formData.description.trim());
       // Envoyer le prix comme un entier (le backend a decimal_places=0)
       formDataToSend.append('price', Math.round(parseFloat(formData.price)));
-      formDataToSend.append('category', formData.category);
+      
+      // Utiliser categoryId (string ou number OK pour backend)
+      formDataToSend.append('category', categoryId || formData.category);
+      
       formDataToSend.append('condition', formData.condition);
       formDataToSend.append('location', formData.location.trim());
 
@@ -154,6 +198,13 @@ const AddProduct = () => {
     { value: 'fair', label: 'État acceptable' },
     { value: 'damaged', label: 'Endommagé' },
   ];
+
+  const handleCategoryInputBlur = () => {
+    if (formData.category && !categoryId) {
+      // Auto-créer si nouvelle sur blur
+      handleCategoryChange(formData.category);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
@@ -223,31 +274,41 @@ const AddProduct = () => {
                 </div>
               </div>
 
-              {/* Catégorie */}
+              {/* Catégorie Combobox */}
               <div>
                 <label htmlFor="category" className="block text-sm font-semibold text-gray-900 mb-2">
-                  Catégorie *
+                  Catégorie * 
+                  <span className="text-xs text-gray-500 ml-1">(Tapez pour créer nouvelle)</span>
                 </label>
                 {categoriesLoading ? (
                   <div className="px-4 py-3 bg-gray-50 rounded-lg text-gray-500 flex items-center gap-2">
                     <Loader className="animate-spin" size={16} /> Chargement...
                   </div>
                 ) : (
-                  <select
-                    id="category"
-                    name="category"
-                    value={formData.category}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  >
-                    <option value="">Sélectionner une catégorie</option>
-                    {categories.map(cat => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      id="category"
+                      name="category"
+                      list="categories-list"
+                      value={formData.category}
+                      onChange={handleInputChange}
+                      onBlur={handleCategoryInputBlur}
+                      placeholder="Ex: Vélo électrique, Ordinateur portable..."
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                    <datalist id="categories-list">
+                      {categories.map(cat => (
+                        <option key={cat.id} value={cat.name} />
+                      ))}
+                    </datalist>
+                    {creatingCategory && (
+                      <div className="absolute right-3 top-3">
+                        <Loader className="animate-spin text-blue-500" size={16} />
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
@@ -383,3 +444,4 @@ const AddProduct = () => {
 };
 
 export default AddProduct;
+

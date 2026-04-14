@@ -92,6 +92,38 @@ export const getCategoryDetail = (slug) => {
   return api.get(`products/categories/${slug}/`);
 };
 
+/**
+ * Créer catégorie si n'existe pas déjà
+ */
+export const createCategoryIfNotExists = async (name) => {
+  if (!name || name.trim().length < 2) {
+    throw new Error('Nom catégorie trop court (min 2 caractères)');
+  }
+  
+  const trimmedName = name.trim();
+  
+  try {
+    // Chercher si existe déjà
+    const { data: categoriesResponse } = await getCategories();
+    const categories = categoriesResponse.results || categoriesResponse.data || categoriesResponse;
+    
+    const found = Array.isArray(categories) ? 
+      categories.find(cat => cat.name.toLowerCase() === trimmedName.toLowerCase()) : 
+      null;
+    
+    if (found) {
+      return { category: found, created: false };
+    }
+    
+    // Créer nouvelle
+    const response = await api.post('products/categories/', { name: trimmedName });
+    return { category: response.data, created: true };
+  } catch (err) {
+    console.error('Erreur createCategoryIfNotExists:', err);
+    throw err;
+  }
+};
+
 export const createCategory = (name) => {
   return api.post('products/categories/', { name });
 };
@@ -110,5 +142,7 @@ export default {
 
   getCategories,
   getCategoryDetail,
+  createCategoryIfNotExists,
   createCategory,
 };
+

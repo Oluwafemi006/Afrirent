@@ -19,6 +19,7 @@ from .serializers import (
     CartItemSerializer,
     CartSerializer,
 )
+from rest_framework.permissions import IsAuthenticated
 from .permissions import IsProductOwner
 from .filters import ProductFilter
 
@@ -36,9 +37,13 @@ class CategoryViewSet(viewsets.ModelViewSet):
     lookup_field = 'slug'
     
     def get_permissions(self):
+        """
+        GET list/retrieve: public
+        Autres actions (create/update): user authentifié
+        """
         if self.action in ['list', 'retrieve']:
             return [AllowAny()]
-        return [IsAdminUser()]
+        return [IsAuthenticated()]
     
     def get_queryset(self):
         return Category.objects.filter(is_active=True).order_by('order')
