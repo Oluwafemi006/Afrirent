@@ -30,8 +30,9 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 
 # CORS
-CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', 
-                             default="https://afrirent.netlify.app,http://localhost:5173,http://127.0.0.1:5173").split(',')
+cors_origins = config('CORS_ALLOWED_ORIGINS', 
+                    default="https://afrirent.netlify.app,http://localhost:5173,http://127.0.0.1:5173")
+CORS_ALLOWED_ORIGINS = [origin.strip() for origin in cors_origins.split(',') if origin.strip()]
 
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
@@ -43,8 +44,10 @@ CORS_ALLOW_METHODS = [
     'POST',
     'PUT',
 ]
-CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', 
-                             default="https://afrirent.netlify.app,https://afrirent-production.up.railway.app").split(',')
+
+csrf_origins = config('CSRF_TRUSTED_ORIGINS', 
+                     default="https://afrirent.netlify.app,https://afrirent-production.up.railway.app")
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins.split(',') if origin.strip()]
 
 # Cloudinary
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
