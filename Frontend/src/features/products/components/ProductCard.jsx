@@ -96,7 +96,7 @@ const ProductCard = ({ product }) => {
         <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between text-gray-500">
           <div className="flex items-center text-sm truncate mr-2">
             <MapPin size={14} className="mr-1 text-gray-400 shrink-0" />
-            <span className="truncate text-xs">{product.location || 'Afrique'}</span>
+            <span className="truncate text-xs">{product.location || 'Bénin'}</span>
           </div>
           <div className="flex items-center text-[10px] font-medium bg-gray-50 px-2 py-1 rounded-md shrink-0">
             <Eye size={12} className="mr-1" />

@@ -40,7 +40,7 @@ export default function Navbar() {
             </div>
             <div className="hidden sm:block">
               <span className="text-2xl font-bold block leading-none">Afrirent</span>
-              <span className="text-[10px] text-blue-200 uppercase tracking-widest font-semibold">Petites Annonces</span>
+              <span className="text-[10px] text-blue-200 uppercase tracking-widest font-semibold">Petites Annonces au Bénin</span>
             </div>
           </Link>
 

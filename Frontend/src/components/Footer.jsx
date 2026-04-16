@@ -15,7 +15,7 @@ export default function Footer() {
               <span className="text-2xl font-bold">Afrirent</span>
             </div>
             <p className="text-gray-400 mb-6 leading-relaxed">
-              La plateforme de petites annonces leader en Afrique. 
+              La plateforme de petites annonces leader au Bénin. 
               Vendez, achetez et louez en toute confiance près de chez vous.
             </p>
             <div className="flex space-x-4">
@@ -103,11 +103,11 @@ export default function Footer() {
               </li>
               <li className="flex items-start space-x-3">
                 <Phone className="w-5 h-5 text-primary shrink-0" />
-                <span>+221 33 000 00 00</span>
+                <span>+229 01 00 00 00 00</span>
               </li>
               <li className="flex items-start space-x-3">
                 <MapPin className="w-5 h-5 text-primary shrink-0" />
-                <span>Dakar, Sénégal / Abidjan, CI</span>
+                <span>Cotonou, Bénin</span>
               </li>
             </ul>
           </div>

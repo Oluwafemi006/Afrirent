@@ -74,10 +74,10 @@ export default function Home() {
             className="text-center mb-10"
           >
             <h1 className="text-3xl md:text-5xl font-bold text-white mb-6">
-              Que cherchez-vous aujourd'hui ?
+              Que cherchez-vous au Bénin ?
             </h1>
             <p className="text-blue-100 text-lg opacity-90">
-              Achetez, vendez et louez en toute sécurité partout en Afrique.
+              Achetez, vendez et louez en toute sécurité de Cotonou à Parakou.
             </p>
           </motion.div>
 
@@ -92,7 +92,7 @@ export default function Home() {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
               <input 
                 type="text" 
-                placeholder="Ex: iPhone, appartement, voiture..." 
+                placeholder="Ex: iPhone, appartement, moto..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-12 pr-4 py-4 rounded-xl border-none focus:ring-2 focus:ring-primary outline-none text-gray-700"
@@ -102,7 +102,7 @@ export default function Home() {
               <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
               <input 
                 type="text" 
-                placeholder="Ville, Pays..." 
+                placeholder="Ville, Quartier (Cotonou, Calavi, Parakou...)" 
                 value={locationQuery}
                 onChange={(e) => setLocationQuery(e.target.value)}
                 className="w-full pl-12 pr-4 py-4 rounded-xl border-none focus:ring-2 focus:ring-primary outline-none text-gray-700"
@@ -211,7 +211,7 @@ export default function Home() {
                 <Smartphone size={32} />
               </div>
               <h3 className="font-bold text-xl mb-3 text-white">Mobile Money</h3>
-              <p className="text-blue-100 opacity-80">Paiements sécurisés via Orange Money, MTN, Wave.</p>
+              <p className="text-blue-100 opacity-80">Paiements sécurisés via MTN MoMo, Moov Money et Celtis Cash.</p>
             </motion.div>
             <motion.div whileHover={{ y: -5 }}>
               <div className="w-16 h-16 bg-white bg-opacity-10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-white border-opacity-10 text-accent">
