@@ -7,6 +7,7 @@ import useAuthStore from './stores/authStore';
 import useCartStore from './stores/cartStore';
 import useFavoriteStore from './stores/favoriteStore';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
 
 import Home from './pages/Home';
@@ -20,6 +21,7 @@ import EditProduct from './features/products/pages/EditProduct';
 import MyProducts from './features/products/pages/MyProducts';
 import Cart from './features/products/pages/Cart';
 import Favorites from './features/products/pages/Favorites';
+import Chat from './features/messaging/pages/Chat';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -65,8 +67,10 @@ function App() {
           {/* Cart & Favorites */}
           <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
           <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
+          <Route path="/messages" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <Footer />
         <ToastContainer
           position="top-right"
           autoClose={3000}

@@ -14,12 +14,14 @@ SECRET_KEY = config('SECRET_KEY')
 
 # Application definition
 DJANGO_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
 ]
 
 THIRD_PARTY_APPS = [
@@ -38,6 +40,7 @@ LOCAL_APPS = [
     'apps.core',
     'apps.users',
     'apps.products',
+    'apps.messaging',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -74,6 +77,14 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'config.wsgi.application'
+ASGI_APPLICATION = 'config.asgi.application'
+
+# Channels / WebSockets Configuration
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
 
 # Custom User Model
 AUTH_USER_MODEL = 'users.User'

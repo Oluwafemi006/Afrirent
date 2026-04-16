@@ -2,6 +2,8 @@ asgiref==3.11.0
 asttokens==3.0.1
 attrs==25.4.0
 black==23.12.1
+channels==4.2.0
+daphne==4.1.2
 certifi==2025.11.12
 charset-normalizer==3.4.4
 click==8.3.1

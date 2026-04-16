@@ -5,8 +5,9 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, MapPin, Eye, Calendar, Edit2, Trash2, User, Shield, Loader, AlertCircle, Heart, ShoppingCart } from 'lucide-react';
+import { ArrowLeft, MapPin, Eye, Calendar, Edit2, Trash2, User, Shield, Loader, AlertCircle, Heart, ShoppingCart, MessageSquare } from 'lucide-react';
 import { getProductDetail, incrementProductViews, deleteProduct } from '../api/products';
+import { createConversation } from '../../messaging/api/messaging';
 import useAuthStore from '../../../stores/authStore';
 import useCartStore from '../../../stores/cartStore';
 import useFavoriteStore from '../../../stores/favoriteStore';
@@ -38,6 +39,7 @@ const ProductDetail = () => {
   const [error, setError] = useState(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [deleting, setDeleting] = useState(false);
+  const [contacting, setContacting] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -83,6 +85,18 @@ const ProductDetail = () => {
       toast.error('Erreur lors de la suppression');
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const handleContact = async () => {
+    try {
+      setContacting(true);
+      await createConversation(product.id, product.seller.id);
+      navigate('/messages');
+    } catch (err) {
+      toast.error('Erreur lors de la mise en relation');
+    } finally {
+      setContacting(false);
     }
   };
 
@@ -243,8 +257,16 @@ const ProductDetail = () => {
                   {isAuthenticated ? (
                     <>
                       <button
+                        onClick={handleContact}
+                        disabled={contacting}
+                        className="w-full flex items-center justify-center gap-2 bg-primary text-white px-4 py-3 rounded-lg font-semibold hover:bg-blue-800 transition shadow-md disabled:opacity-50"
+                      >
+                        <MessageSquare size={18} /> 
+                        {contacting ? 'Mise en relation...' : 'Contacter le vendeur'}
+                      </button>
+                      <button
                         onClick={() => addItem(product.id)}
-                        className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+                        className="w-full flex items-center justify-center gap-2 bg-blue-50 text-primary px-4 py-3 rounded-lg font-semibold hover:bg-blue-100 transition border border-primary border-opacity-20"
                       >
                         <ShoppingCart size={18} /> Ajouter au panier
                       </button>
@@ -263,9 +285,9 @@ const ProductDetail = () => {
                   ) : (
                     <Link
                       to="/login"
-                      className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+                      className="w-full flex items-center justify-center gap-2 bg-primary text-white px-4 py-3 rounded-lg font-semibold hover:bg-blue-800 transition"
                     >
-                      Connectez-vous pour acheter
+                      Connectez-vous pour contacter
                     </Link>
                   )}
                 </div>

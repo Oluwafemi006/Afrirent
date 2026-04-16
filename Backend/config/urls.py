@@ -29,6 +29,7 @@ urlpatterns = [
     path('api/', include('apps.core.urls')),
     path('api/auth/', include('apps.users.urls')),
     path('api/products/', include('apps.products.urls')),
+    path('api/messaging/', include('apps.messaging.urls')),
 ]
 
 if settings.DEBUG:
